@@ -1,239 +1,97 @@
-// // // import { join } from 'path';
-// // // import admin from 'firebase-admin';
-// // // // import serviceAccount from './iot-zebra-a7889-firebase-adminsdk-qtkf6-ce152fea44.json' assert { type: "json" };
+import { onObjectFinalized } from 'firebase-functions/v2/storage';
+import { initializeApp, cert } from 'firebase-admin/app';
+import { getDatabase } from 'firebase-admin/database';
+import { getStorage } from 'firebase-admin/storage';
+import logger from 'firebase-functions/logger';
+import axios from 'axios';
+import serviceAccount from './iot-zebra-a7889-firebase-adminsdk-qtkf6-fecee77a59.json' with { type: 'json' };
 
-// // // // Initialize Firebase Admin SDK
-// // // admin.initializeApp({
-// // //   credential: admin.credential.cert(serviceAccount),
-// // //   storageBucket: 'iot-zebra-a7889.appspot.com', // Correct bucket name format
-// // // });
+initializeApp({
+    credential: cert(serviceAccount),  // Automatically use default credentials
+    databaseURL: 'https://iot-zebra-a7889-default-rtdb.asia-southeast1.firebasedatabase.app',
+    storageBucket: 'iot-zebra-a7889.firebasestorage.app' // Ensure this matches your Firebase Storage bucket
+});
 
-// // // import { initializeApp, applicationDefault } from 'firebase-admin/app';
+export const onFileUpload = onObjectFinalized({ cpu: 2 }, async (event) => {
+    const filePath = event.data.name; // File path in the bucket.
+    const contentType = event.data.contentType; // File content type.
 
-// // // initializeApp({
-// // //     credential: applicationDefault(),
-// // //     databaseURL: 'iot-zebra-a7889.appspot.com'
-// // // });
-
-// // // const database = admin.database();
-
-// // // // Cloud Function to handle file uploads to Firebase Storage
-// // // import { storage } from "firebase-functions";
-
-// // // export const onFileUpload = storage.object().onFinalize(async (object) => {
-// // //   const filePath = object.name; // File path in the storage bucket
-// // //   const bucketName = object.bucket; // Bucket name
-// // //   const fileURL = `https://storage.googleapis.com/${bucketName}/${filePath}`; // Public URL
-
-// // //   // Extract metadata from the file name (assuming the format: YYYY-MM-DD_HH-MM-SS)
-// // //   const fileName = filePath.split("/").pop(); // Extract the file name
-// // //   const [date, timeWithExt] = fileName.split("_");
-// // //   const time = timeWithExt?.replace(/\.[^/.]+$/, ""); // Remove file extension
-
-// // //   if (!date || !time) {
-// // //     console.error("File name does not follow the expected format: YYYY-MM-DD_HH-MM-SS");
-// // //     return;
-// // //   }
-
-// // //   try {
-// // //     // Save metadata to Realtime Database
-// // //     await database.ref(`data/${date}`).push({
-// // //       imageURL: fileURL,
-// // //       date,
-// // //       time,
-// // //       fileName,
-// // //     });
-
-// // //     console.log(`Metadata for file ${fileName} successfully stored.`);
-// // //   } catch (error) {
-// // //     console.error("Error saving metadata to Realtime Database:", error);
-// // //   }
-// // // });
-
-
-// // import { join } from 'path';
-// // import admin from 'firebase-admin';
-// // import * as functions from 'firebase-functions';
-// // import serviceAccount from './iot-zebra-a7889-firebase-adminsdk-qtkf6-ce152fea44.json' with { type: "json" };
-
-// // // Initialize Firebase Admin SDK
-// // admin.initializeApp({
-// //   credential: admin.credential.cert(serviceAccount),
-// //   databaseURL: 'https://iot-zebra-a7889-default-rtdb.asia-southeast1.firebasedatabase.app',
-// //   storageBucket: 'iot-zebra-a7889.appspot.com', // Ensure this matches your Firebase Storage bucket
-// // });
-
-// // // Firebase Realtime Database
-// // const database = admin.database();
-
-// // // Cloud Function to handle file uploads to Firebase Storage
-// // export const onFileUpload = functions.storage.object().onFinalize(async (object) => {
-// //   const filePath = object.name; // File path in the storage bucket
-// //   const bucketName = object.bucket; // Bucket name
-// //   const fileURL = `https://storage.googleapis.com/${bucketName}/${filePath}`; // Public URL
-
-// //   // Extract metadata from the file name (assuming the format: YYYY-MM-DD_HH-MM-SS)
-// //   const fileName = filePath.split("/").pop(); // Extract the file name
-// //   const [date, timeWithExt] = fileName.split("_");
-// //   const time = timeWithExt?.replace(/\.[^/.]+$/, ""); // Remove file extension
-
-// //   if (!date || !time) {
-// //     console.error("File name does not follow the expected format: YYYY-MM-DD_HH-MM-SS");
-// //     return;
-// //   }
-
-// //   try {
-// //     // Save metadata to Realtime Database
-// //     await database.ref(`data/${date}`).push({
-// //       imageURL: fileURL,
-// //       licensePlate,
-// //       date,
-// //       time,
-// //       fileName,
-// //     });
-
-// //     console.log(`Metadata for file ${fileName} successfully stored.`);
-// //   } catch (error) {
-// //     console.error("Error saving metadata to Realtime Database:", error);
-// //   }
-// // });
-
-// // import { join } from 'path';
-// // import admin from 'firebase-admin';
-// // import * as functions from 'firebase-functions';
-// // import serviceAccount from './iot-zebra-a7889-firebase-adminsdk-qtkf6-ce152fea44.json' with { type: "json" };
-
-// // // Initialize Firebase Admin SDK
-// // admin.initializeApp({
-// //   credential: admin.credential.cert(serviceAccount),
-// //   databaseURL: 'https://iot-zebra-a7889-default-rtdb.asia-southeast1.firebasedatabase.app',
-// //   storageBucket: 'iot-zebra-a7889.appspot.com', // Ensure this matches your Firebase Storage bucket
-// // });
-
-// // // Firebase Realtime Database
-// // const database = admin.database();
-
-// // // Cloud Function to handle file uploads to Firebase Storage
-// // export const onFileUpload = functions.storage.object().onFinalize(async (object) => {
-// //   console.log("File upload triggered");  // Debug log for function trigger
-
-// //   const filePath = object.name; // File path in the storage bucket
-// //   const bucketName = object.bucket; // Bucket name
-// //   const fileURL = `https://storage.googleapis.com/${bucketName}/${filePath}`; // Public URL
-  
-// //   console.log(`File path: ${filePath}`);  // Debug log for file path
-// //   console.log(`Bucket name: ${bucketName}`);  // Debug log for bucket name
-// //   console.log(`File URL: ${fileURL}`);  // Debug log for generated file URL
-
-// //   // Extract metadata from the file name (assuming the format: YYYY-MM-DD_HH-MM-SS)
-// //   const fileName = filePath.split("/").pop(); // Extract the file name
-// //   console.log(`Extracted file name: ${fileName}`);  // Debug log for extracted file name
-
-// //   const [date, timeWithExt] = fileName.split("_");
-// //   const time = timeWithExt?.replace(/\.[^/.]+$/, ""); // Remove file extension
-
-// //   if (!date || !time) {
-// //     console.error("File name does not follow the expected format: YYYY-MM-DD_HH-MM-SS");
-// //     return;
-// //   }
-  
-// //   console.log(`Extracted date: ${date}, time: ${time}`);  // Debug log for extracted date and time
-
-// //   try {
-// //     // Save metadata to Realtime Database
-// //     console.log("Saving metadata to Realtime Database...");
-// //     await database.ref(`data/${date}`).push({
-// //       imageURL: fileURL,
-// //       licensePlate: 'Some License Plate', // Add proper variable or logic here if needed
-// //       date,
-// //       time,
-// //       fileName,
-// //     });
-
-// //     console.log(`Metadata for file ${fileName} successfully stored.`);  // Success log
-// //   } catch (error) {
-// //     console.error("Error saving metadata to Realtime Database:", error);  // Error log
-// //   }
-// // });
-
-
-
-
-// // // import functions from 'firebase-functions/v1';
-// // import * as admin from 'firebase-admin';
-// // import * as functions from 'firebase-functions';
-// // import serviceAccount from './iot-zebra-a7889-firebase-adminsdk-qtkf6-ce152fea44.json' with { type: "json" };
-
-
-// // admin.initializeApp({
-// //   credential: admin.credential.cert(serviceAccount),
-// //   databaseURL: 'https://iot-zebra-a7889-default-rtdb.asia-southeast1.firebasedatabase.app',
-// //   storageBucket: 'iot-zebra-a7889.appspot.com', // Ensure this matches your Firebase Storage bucket
-// // });
-
-// // const database = admin.database();
-
-// // const JPEG_EXTENSION = '.jpg';
-
-// // export const onFileUpload = functions.storage.object().onFinalize(async (object) => {
-// //     console.log("Upload Triggered!")
-// //     console.log(object.name);
-// // });
-
-
-
-// import { onObjectFinalized } from 'firebase-functions/v2/storage';
-// import { initializeApp } from 'firebase-admin/app';
-// import { getStorage } from 'firebase-admin/storage';
-// import * as logger from 'firebase-functions/logger';
-// import path from 'path';
-
-// // library for image resizing
-// // import sharp from 'sharp';
-
-// initializeApp();
-
-// // scope handler to a specific bucket, using storage options parameter
-// export const archivedopts = onObjectFinalized({ bucket: 'iot-zebra-a7889.appspot.com' }, (event) => {
-//   const fileBucket = event.data.bucket; // Storage bucket containing the file.
-//   const filePath = event.data.name; // File path in the bucket.
-//   const contentType = event.data.contentType; // File content type.
-
-//   console.log('Bucket:', fileBucket);
-//   console.log('File Path:', filePath);
-//   console.log('Content Type:', contentType);
-// });
-import { initializeApp } from "firebase-admin/app";
-import { storage } from "firebase-functions/v1";
-import { getStorage } from "firebase-admin/storage";
-
-// Initialize Firebase Admin SDK
-initializeApp();
-
-// If you're using a custom bucket, replace 'your-custom-bucket-name' with the actual bucket name
-const bucket = getStorage().bucket(); // Custom bucket
-
-export const imageUploadTrigger = storage.object().onFinalize(async (object) => {
-    console.log("Storage object finalized");
-
-    const filePath = object.name;
-    if (!filePath) {
-        console.error("No file path found!");
+    if (!contentType.startsWith("image/")) {
+        logger.error("Invalid file type: ", contentType);
         return;
     }
 
-    console.log(`File uploaded: ${filePath}`);
+    // Extract metadata from the file name (assuming the format: YYYY-MM-DD_HH-MM-SS)
+    const fileName = filePath.split("/").pop(); // Extract the file name
+    const [date, timeWithExt] = fileName.split("_");
+    const time = timeWithExt?.replace(/\.[^/.]+$/, ""); // Remove file extension
 
-    // Example: Check if the uploaded file is an image
-    const contentType = object.contentType;
-    if (!contentType || !contentType.startsWith("image/")) {
-        console.log("The uploaded file is not an image.");
+    if (!date || !time) {
+        logger.error("File name does not follow the expected format: YYYY-MM-DD_HH-MM-SS");
         return;
     }
 
-    console.log(`Image uploaded successfully: ${filePath}`);
+    // Log the data to check
+    logger.log(`File uploaded! Path: ${filePath}, Content Type: ${contentType}`);
+    logger.log(`Image Date: ${date}, Time: ${time}, File Name: ${fileName}`);
 
-    // Optionally: Perform any operation with the custom bucket, e.g., download the file
-    const file = bucket.file(filePath);
-    console.log(`Performing operation on file: ${file.name}`);
+    // Save the data to Firebase Realtime Database
+    const database = getDatabase();
+    const dataRef = database.ref('Cars'); // Reference to the 'uploadedFiles' node in the Realtime Database
+
+    // Get a reference to Firebase Storage
+    const storage = getStorage();
+    const fileRef = storage.bucket().file(filePath);
+
+    try {
+        const snapshot = await dataRef.once('value');
+        const carsData = snapshot.val();
+
+        const isDuplicate = carsData
+            ? Object.values(carsData).some((car) => car.filePath === filePath)
+            : false;
+
+        if (isDuplicate) {
+            logger.log(`Duplicate entry detected for filePath: ${filePath}. Skipping save.`);
+            return; // Exit if duplicate is found
+        }
+
+        // Get a signed URL for the file from Firebase Storage
+        const signedUrls = await fileRef.getSignedUrl({
+            action: 'read', // You want to allow read access to the file
+            expires: '03-09-2491' // Set an expiration date far in the future
+        });
+
+        const downloadURL = signedUrls[0]; // Extract the download URL from the array
+
+        let data = { plate_number: "No plate detected", province: "No province detected", raw_province: "No raw province detected" };
+
+        try {
+            const response = await axios.post("https://fastapi-iot-560924732058.asia-southeast1.run.app/process-image/", { image_path: downloadURL });
+            data = response.data;
+            logger.log("Received response from FastAPI:", data);
+        } catch (error) {
+            logger.error("Error calling FastAPI:", error);
+        }
+
+        const plateNumber = data.plate_number || "No plate detected";
+        const province = data.province || "No province detected";
+        const rawProvince = data.raw_province || "No raw province detected";
+
+        // Save the file data to the database
+        await dataRef.push({
+            filePath,
+            date,
+            time,
+            fileName,
+            plateNumber,
+            province,
+            rawProvince
+        });
+
+        logger.log(`Metadata for file ${fileName} successfully stored.`);
+        logger.log("Data saved to Realtime Database!");
+    } catch (error) {
+        logger.error("Error saving metadata to Realtime Database:", error);
+    }
 });

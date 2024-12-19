@@ -1,127 +1,70 @@
-// import React, { useEffect, useState } from "react";
-// import app from './configuration'; // Assuming the correct path to your configuration file
-// import { get, ref, onValue } from "firebase/database";
-
-// const { database } = app;
-
-// // App.js
-// function App() {
-//   const [data, setData] = useState([]);
-
-//   useEffect(() => {
-//     // Initialize the Firebase database with the provided configuration
-//     // const database = getDatabase(cong);
-
-//     // Reference to the specific collection in the database
-//     const collectionRef = ref(database, "Cars");
-
-//   //   get(collectionRef).then((snapshot) => {
-//   //     if(snapshot.exists()) {
-//   //       const carArray = Object.entries(snapshot.val()).map(([id, data]) => ({
-//   //         id,
-//   //         ...data,
-//   //       }));
-//   //       setData(carArray);
-//   //     } else {
-//   //       console.log("No data available");
-//   //     }
-//   //   }).catch((error) => {
-//   //     console.error(error);
-//   //   });
-//   // }, []);
-
-//     // Function to fetch data from the database
-//     const fetchData = () => {
-//       // Listen for changes in the collection
-//       onValue(collectionRef, (snapshot) => {
-//         const dataItem = snapshot.val();
-
-//         // Check if dataItem exists
-//         if (dataItem) {
-//           // Convert the object values into an array
-//           const displayItem = Object.values(dataItem);
-//           setData(displayItem);
-//         }
-//       });
-//     };
-
-//     // Fetch data when the component mounts
-//     fetchData();
-//   }, []);
-
-//   return (
-//     <div>
-//       <h1>Data from database:</h1>
-//       <div className='grid grid-cols-3 gap-4'>
-//         {data.map((car) => (
-//           <div key={car.id} className='bg-gray-100 p-4 rounded-g'>
-//             <h2 className='text-2xl text-gray-900'>{car.licensePlate}</h2>
-//             <p className='text-gray-600'>{car.imageURL}</p>
-//             <p className='text-gray-600'>{car.time}</p>
-//           </div>
-//         ))}
-//       </div>
-//     </div>
-//   );
-// }
-
-// export default App;
-
-
-
 import React, { useEffect, useState } from "react";
 import Calendar from "react-calendar";
 import 'react-calendar/dist/Calendar.css';
 import './App.css';
 
 import app from './configuration'; // Assuming the correct path to your configuration file
-import { ref as storageRef, listAll, getDownloadURL } from "firebase/storage";
+import { ref as sRef, getDownloadURL } from 'firebase/storage';
+import { ref, onValue } from "firebase/database";
 
-const { storage } = app;
 
+const { database, storage } = app;
 const App = () => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
-  const [images, setImages] = useState([]);
+  const [data, setData] = useState([]);
 
   useEffect(() => {
-    const fetchImages = async () => {
-      try {
-        const imagesRef = storageRef(storage, "data"); // Path to your storage folder
-        const imageList = await listAll(imagesRef); // Get all files in the "data" folder
+    // Get a reference to the 'Cars' node in your Firebase Realtime Database
+    const databaseRef = ref(database, "Cars");
 
-        // Fetch image URLs and extract date and time from the filenames
-        const imageData = await Promise.all(
-          imageList.items.map(async (imageItem) => {
-            try {
-              const imageURL = await getDownloadURL(imageItem); // Get image URL
-              const fileName = imageItem.name; // Get the image file name
+    // Set up a real-time listener
+    const unsubscribe = onValue(
+      databaseRef,
+      async (snapshot) => {
+        if (snapshot.exists()) {
+          console.log("Real-time data update!");
 
-              // Extract date and time from the filename (assuming the format is YYYY-MM-DD_HH-MM-SS)
-              const [date, time] = fileName.split('_'); 
-              const formattedDate = date; // "YYYY-MM-DD"
-              const formattedTime = time.replace(/-/g, ":"); // "HH:MM:SS"
+          // Get all the image data from the snapshot
+          const dataList = snapshot.val();
+
+          const loadedData = await Promise.all(
+            Object.keys(dataList).map(async (key) => {
+              const { filePath, date, time, plateNumber, province, rawProvince } = dataList[key];
+
+              const storageRef = sRef(storage, filePath);
+              const imageURL = await getDownloadURL(storageRef);
+
+              // Convert the time from HH-MM-SS format to HH:MM:SS
+              const formattedTime = time.replace(/-/g, ":");
+              // console.log(imageURL);
 
               return {
+                id: key,
                 imageURL,
-                date: formattedDate,
+                date,
                 time: formattedTime,
+                plateNumber,
+                province,
+                rawProvince
               };
-            } catch (error) {
-              console.error("Error fetching image:", error);
-              return null;
-            }
-          })
-        );
+            })
+          );
 
-        // Filter out any null results (in case of errors fetching image URL)
-        setImages(imageData.filter((item) => item !== null));
-      } catch (error) {
-        console.error("Error fetching images:", error);
+          // Update the state with the formatted image data
+          setData(loadedData);
+        } else {
+          console.log("No images found in the database");
+          setData([]); // Clear the state if no data exists
+        }
+      },
+      (error) => {
+        console.error("Error listening to real-time updates:", error);
       }
-    };
+    );
 
-    fetchImages();
+    // Clean up the listener when the component unmounts
+    return () => unsubscribe();
   }, []);
 
   const handleDateChange = (date) => {
@@ -131,7 +74,7 @@ const App = () => {
 
   const getTileContent = ({ date }) => {
     const formattedDate = date.toLocaleDateString('en-CA'); // Ensure the same format for comparison
-    const count = images.filter(item => item.date === formattedDate).length;
+    const count = data.filter(item => item.date === formattedDate).length;
     
     return count > 0 ? (
       <div className="absolute top-0 right-0 text-xs text-white font-semibold bg-red-600 px-2 py-1 rounded-full z-10">
@@ -140,7 +83,7 @@ const App = () => {
     ) : null;
   };
 
-  const filteredImages = images.filter(item => item.date === selectedDate);
+  const filteredImages = data.filter(item => item.date === selectedDate);
 
   const handleImageClick = (image) => {
     setSelectedImage(image);
@@ -192,25 +135,27 @@ const App = () => {
             <h2 className="text-xl font-semibold mb-6 text-center text-gray-700">
               Violations on {selectedDate}
             </h2>
-            {filteredImages.length > 0 ? (
+            {data.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 px-4">
-                {filteredImages.map((image, index) => (
+                {filteredImages.map((item, index) => (
                   <div
                     key={index}
                     className="card bg-white border border-gray-200 rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300"
                   >
                     <div className="relative">
                       <img
-                        src={image.imageURL}
-                        alt={`Violation`}
+                        src={item.imageURL}
+                        alt={``}
                         className="w-full h-56 object-cover cursor-pointer"
-                        onClick={() => handleImageClick(image.imageURL)}
+                        onClick={() => handleImageClick(item.imageURL)}
                       />
                     </div>
 
                     <div className="p-4">
-                      <p className="text-lg text-gray-800 font-semibold mb-2">Date: {image.date}</p>
-                      <p className="text-gray-600">Time: {fotmatTime(image.time)}</p>
+                      <p className="text-lg text-gray-900 font-bold mb-2">Plate Number: {item.plateNumber}</p>
+                      <p className="text-lg text-gray-900 font-bold mb-2">Plate Province: {item.province}</p>
+                      <p className="text-lg text-gray-800 font-semibold mb-2">Date: {item.date}</p>
+                      <p className="text-gray-600">Time: {fotmatTime(item.time)}</p>
                     </div>
                   </div>
                 ))}

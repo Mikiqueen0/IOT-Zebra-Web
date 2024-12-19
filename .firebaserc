@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "iot-zebra-a7889"
-  }
+    "default": "iot-zebra-a7889",
+    "staging": "iot-zebra-a7889"
+  },
+  "targets": {},
+  "etags": {}
 }
