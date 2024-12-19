@@ -1,70 +1,58 @@
-# Getting Started with Create React App
+# Pedestrian crossing system designed to enhance crosswalk safety (ระบบทางเดินทางม้าลายที่ส่งเสริมการข้ามทางม้าลายที่มีความปลอดภัย) 
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+เป็นระบบทางเดินม้าลายให้มีความปลอดภัยต่อตัวผู้ข้ามทางม้าลาย เเละลดการเกิดอุบัติเหตุบนทางเดินม้าลาย เพื่อคำนึงถึงความปลอดภัยของคนที่จะข้ามทางม้าลายที่เมื่อรถยนต์หรือมอเตอร์ไซต์ขับมาด้วยความเร็วที่สามารถจะชนคนข้ามถนนได้
 
-## Available Scripts
+# Content
+ - [วัตถุประสงค์](#วัตถุประสงค์)
+ - [อุปกรณ์ที่ใช้ในโครงงาน](#อุปกรณ์ที่ใช้ในโครงงาน)
+ - [Framework](#Framework)
+ - [ขั้นตอนกาารทำงาน](#ขั้นตอนการทำงาน)
 
-In the project directory, you can run:
 
-### `npm start`
+# วัตถุประสงค์
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+ - ต้องการเพิ่มความปลอดภัยของทางม้าลาย
+ - ต้องการให้ผู้ใช้รถ หยุดรถเพื่อให้คนข้ามทางม้าลายก่อน
+ - ต้องการตรวจจับคนที่อยู่บนทางม้าลาย เพื่อความปลอดภัยของคนข้าม
+ 
+# อุปกรณ์ที่ใช้ในโครงงาน 
+- Ultrasonic Sensor 1 ตัว
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- IR Infrared Sensor 1 ตัว
 
-### `npm test`
+- จอแสดงผล OLED 1 ตัว
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- ESP32 1 ตัว
 
-### `npm run build`
+- โมดูลไฟจราจร 2 ตัว
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+- Buzzer 1 ตัว
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+- ไม้กั้น
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+- Button Switch 1 ตัว
 
-### `npm run eject`
+- Servo SG90 1 ตัว
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+- โมดูล ESP32-Cam 1 ตัว
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+- Breadboard
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+- สาย Jumper
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+- Plastwood
 
-## Learn More
+# Framework
+ - Arduino IDE
+ - Firebase
+ - React
+# ขั้นตอนการทำงาน
+**กรณีตรวจจับคนข้ามทางม้าลาย**
+ กด Button Switch เพื่อส่งสัญญาณไฟเเดงให้รถยนต์หยุด ในส่วนนี้จะเป็นการทำงานของ *Ultrasonic Sensor* เพื่อตรวจจับคนบนทางม้าลายว่าพบเจอคนบนทางม้าลายหรือไม่ 
+- ถ้าเจอสัญญาณไฟจะยังเเดงอยู่
+- ถ้าไม่เจอสัญญาณไฟจะเป็นสีเขียวเพื่ออนุญาติให้รถขับต่อได้
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+**กรณีตรวจจับรถยนต์ที่ขับชนไม้กั้น**
+เมื่อรถยนต์เกิดการชนไม้กั้น ในส่วนนี้จะเป็นการทำงานของ *IR Infrared Sensor* เเละ *โมดูล ESP32-Cam* เพื่อนำข้อมูลไปบันทึกลง Database เเละปรากฎบนเว็บ [https://iot-zebra-a7889.web.app/](https://iot-zebra-a7889.web.app/)
 
-To learn React, check out the [React documentation](https://reactjs.org/).
 
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
