@@ -2,12 +2,16 @@
 
 เป็นระบบทางเดินม้าลายให้มีความปลอดภัยต่อตัวผู้ข้ามทางม้าลาย เเละลดการเกิดอุบัติเหตุบนทางเดินม้าลาย เพื่อคำนึงถึงความปลอดภัยของคนที่จะข้ามทางม้าลายที่เมื่อรถยนต์หรือมอเตอร์ไซต์ขับมาด้วยความเร็วที่สามารถจะชนคนข้ามถนนได้
 
+### GitHub Repository for this Project
+ - [Web] https://github.com/Mikiqueen0/IOT-Zebra-Web
+ - [Microcontroller] https://github.com/Mikiqueen0/IOT-ESP32-Zebra
+ - [Machine Learning] https://github.com/Mikiqueen0/IOT-LicensePlateDetection
+
 # Content
  - [วัตถุประสงค์](#วัตถุประสงค์)
  - [อุปกรณ์ที่ใช้ในโครงงาน](#อุปกรณ์ที่ใช้ในโครงงาน)
  - [Framework](#Framework)
  - [ขั้นตอนกาารทำงาน](#ขั้นตอนการทำงาน)
-
 
 # วัตถุประสงค์
 
